@@ -22,16 +22,20 @@ public class CommentServiceImpl implements CommentService {
 	private CommentRepository commentRepository;
 
 	@Override
-	public void deleteComment(Long id) throws CommentException {
-		Optional<Comment> blog = commentRepository.findById(id);
+	public void deleteComment(Long id, Long userId) throws CommentException {
+		Optional<Comment> comment = commentRepository.findById(id);
 
-		if (blog.isPresent()) {
-			commentRepository.deleteById(blog.get().getId());
-			return;
+		if (comment.isPresent()) {
+			if (comment.get().getUserId().equals(userId)) {
+				commentRepository.deleteById(comment.get().getId());
+				return;
+			} else {
+				throw new CommentException("You do not have permissions to delete comments of others users",
+						HttpStatus.BAD_REQUEST);
+			}
 		}
 
 		throw new CommentException("Comment not found with id: " + id, HttpStatus.NOT_FOUND);
-
 	}
 
 	@Override
@@ -48,6 +52,20 @@ public class CommentServiceImpl implements CommentService {
 			return convertToCommentDTO(comment.get());
 		}
 		throw new CommentException("Comment not found with id: " + id, HttpStatus.NOT_FOUND);
+	}
+
+	@Override
+	public List<CommentDTO> getCommentsByBlog(Long id) {
+		List<Comment> comments = commentRepository.getCommentsByBlog(id);
+
+		return comments.stream().map(this::convertToCommentDTO).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<CommentDTO> getCommentsByUser(Long id) {
+		List<Comment> comments = commentRepository.getCommentsByUser(id);
+
+		return comments.stream().map(this::convertToCommentDTO).collect(Collectors.toList());
 	}
 
 	@Override

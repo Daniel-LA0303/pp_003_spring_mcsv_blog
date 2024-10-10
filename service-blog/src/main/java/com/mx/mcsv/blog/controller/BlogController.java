@@ -32,9 +32,9 @@ public class BlogController {
 	@Autowired
 	private BlogService blogService;
 
-	@DeleteMapping("/{id}")
-	public ResponseEntity<?> deleteBlog(@PathVariable Long id) throws BlogException {
-		blogService.deleteBlog(id);
+	@DeleteMapping("/{id}/{userId}")
+	public ResponseEntity<?> deleteBlog(@PathVariable Long id, @PathVariable Long userId) throws BlogException {
+		blogService.deleteBlog(id, userId);
 
 		ApiResponse<String, String> apiResponse = new ApiResponse<>(200, "Blog deleted", null);
 		return new ResponseEntity<>(apiResponse, HttpStatus.OK);
@@ -49,14 +49,23 @@ public class BlogController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<?> getUser(@PathVariable Long id) throws BlogException {
+	public ResponseEntity<?> getBlog(@PathVariable Long id) throws BlogException {
 		BlogDTO blogDTO = blogService.findById(id);
 		ApiResponse<BlogDTO, String> apiResponse = new ApiResponse<>(200, blogDTO, null);
 		return new ResponseEntity<>(apiResponse, HttpStatus.OK);
 	}
 
+	@GetMapping("/get-blogs-by-id/{id}")
+	public ResponseEntity<?> getBlogsByUser(@PathVariable Long id) throws BlogException {
+
+		List<BlogDTO> blogsResponse = blogService.findByUserId(id);
+		ApiResponse<List<BlogDTO>, String> apiResponse = new ApiResponse<>(200, blogsResponse, null);
+		return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+
+	}
+
 	@PostMapping
-	public ResponseEntity<?> saveUser(@Valid @RequestBody Blog blog, BindingResult result) throws BlogException {
+	public ResponseEntity<?> saveBlog(@Valid @RequestBody Blog blog, BindingResult result) throws BlogException {
 
 		if (result.hasErrors()) {
 			return validation(result);
@@ -69,7 +78,7 @@ public class BlogController {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @RequestBody Blog blog, BindingResult result)
+	public ResponseEntity<?> updateBlog(@PathVariable Long id, @Valid @RequestBody Blog blog, BindingResult result)
 			throws BlogException {
 
 		if (result.hasErrors()) {

@@ -32,9 +32,9 @@ public class CommentController {
 	@Autowired
 	private CommentService commentService;
 
-	@DeleteMapping("/{id}")
-	public ResponseEntity<?> deleteComment(@PathVariable Long id) throws CommentException {
-		commentService.deleteComment(id);
+	@DeleteMapping("/{id}/{userId}")
+	public ResponseEntity<?> deleteComment(@PathVariable Long id, @PathVariable Long userId) throws CommentException {
+		commentService.deleteComment(id, userId);
 
 		ApiResponse<String, String> apiResponse = new ApiResponse<>(200, "Comment deleted", null);
 		return new ResponseEntity<>(apiResponse, HttpStatus.OK);
@@ -55,6 +55,24 @@ public class CommentController {
 		return new ResponseEntity<>(apiResponse, HttpStatus.OK);
 	}
 
+	@GetMapping("/by-blog/{id}")
+	public ResponseEntity<?> getCommentsByBlog(@PathVariable Long id) throws CommentException {
+
+		List<CommentDTO> comments = commentService.getCommentsByBlog(id);
+
+		ApiResponse<List<CommentDTO>, String> apiResponse = new ApiResponse<>(200, comments, null);
+		return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+	}
+
+	@GetMapping("/by-user/{id}")
+	public ResponseEntity<?> getCommentsByUser(@PathVariable Long id) throws CommentException {
+
+		List<CommentDTO> comments = commentService.getCommentsByUser(id);
+
+		ApiResponse<List<CommentDTO>, String> apiResponse = new ApiResponse<>(200, comments, null);
+		return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+	}
+
 	@PostMapping
 	public ResponseEntity<?> saveComment(@Valid @RequestBody Comment comment, BindingResult result)
 			throws CommentException {
@@ -70,7 +88,7 @@ public class CommentController {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @RequestBody Comment comment,
+	public ResponseEntity<?> updateController(@PathVariable Long id, @Valid @RequestBody Comment comment,
 			BindingResult result) throws CommentException {
 
 		if (result.hasErrors()) {

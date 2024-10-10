@@ -22,12 +22,21 @@ public class BlogServiceImpl implements BlogService {
 	private BlogRepository blogRepository;
 
 	@Override
-	public void deleteBlog(Long id) throws BlogException {
+	public void deleteBlog(Long id, Long userId) throws BlogException {
+
 		Optional<Blog> blog = blogRepository.findById(id);
 
 		if (blog.isPresent()) {
-			blogRepository.deleteById(blog.get().getId());
-			return;
+
+			if (blog.get().getUserId().equals(userId)) {
+				blogRepository.deleteById(blog.get().getId());
+				return;
+			} else {
+				throw new BlogException(
+						"You do not have permissions to delete blogs of others users or user not found: ",
+						HttpStatus.BAD_REQUEST);
+			}
+
 		}
 
 		throw new BlogException("Blog not found with id: " + id, HttpStatus.NOT_FOUND);
@@ -48,6 +57,13 @@ public class BlogServiceImpl implements BlogService {
 			return convertToBlogDTO(blog.get());
 		}
 		throw new BlogException("Blog not found with id: " + id, HttpStatus.NOT_FOUND);
+	}
+
+	@Override
+	public List<BlogDTO> findByUserId(Long id) throws BlogException {
+
+		List<Blog> blogsByUserId = blogRepository.findBlogsByUserId(id);
+		return blogsByUserId.stream().map(this::convertToBlogDTO).collect(Collectors.toList());
 	}
 
 	@Override

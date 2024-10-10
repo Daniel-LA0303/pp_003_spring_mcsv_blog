@@ -8,11 +8,15 @@ import com.mx.mcsv.comments.exceptions.CommentException;
 
 public interface CommentService {
 
-	void deleteComment(Long id) throws CommentException;
+	void deleteComment(Long id, Long userId) throws CommentException;
 
 	List<CommentDTO> findAll();
 
 	CommentDTO findById(Long id) throws CommentException;
+
+	List<CommentDTO> getCommentsByBlog(Long id);
+
+	List<CommentDTO> getCommentsByUser(Long id);
 
 	CommentDTO save(Comment comment) throws CommentException;
 

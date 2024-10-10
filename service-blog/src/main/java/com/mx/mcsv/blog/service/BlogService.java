@@ -8,11 +8,13 @@ import com.mx.mcsv.blog.exception.BlogException;
 
 public interface BlogService {
 
-	void deleteBlog(Long id) throws BlogException;
+	void deleteBlog(Long id, Long userId) throws BlogException;
 
 	List<BlogDTO> findAll();
 
 	BlogDTO findById(Long id) throws BlogException;
+
+	List<BlogDTO> findByUserId(Long id) throws BlogException;
 
 	BlogDTO save(Blog blog) throws BlogException;
 
