@@ -1,9 +1,13 @@
 package com.mx.mcsv.auth.dto;
 
+import javax.validation.constraints.NotBlank;
+
 public class AuthUserDto {
 
+	@NotBlank
 	private String userName;
 
+	@NotBlank
 	private String password;
 
 	/**
