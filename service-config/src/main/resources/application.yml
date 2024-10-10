@@ -1,0 +1,12 @@
+server:
+  port: 8084
+spring:
+  cloud:
+    config:
+      server:
+        git:
+          default-label: main
+          uri: https://github.com/Daniel-LA0303/pp_003_spring_mcsv_blog
+          search-paths: config-data
+  application:
+    name: service-config
