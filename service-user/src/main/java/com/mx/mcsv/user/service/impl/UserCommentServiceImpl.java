@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mx.mcsv.user.config.resttemplateconfig.BlogOpenFeign;
 import com.mx.mcsv.user.config.resttemplateconfig.CommentOpenFeign;
@@ -122,7 +124,9 @@ public class UserCommentServiceImpl {
 			} else {
 				return Map.of("error", "No error information found");
 			}
-		} catch (Exception e) {
+		} catch (JsonMappingException e) {
+			return Map.of("error", "Failed to extract error details");
+		} catch (JsonProcessingException e) {
 			return Map.of("error", "Failed to extract error details");
 		}
 	}

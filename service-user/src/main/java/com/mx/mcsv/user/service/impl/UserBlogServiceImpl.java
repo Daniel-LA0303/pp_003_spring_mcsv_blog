@@ -96,9 +96,12 @@ public class UserBlogServiceImpl {
 			}
 		} catch (JsonProcessingException e) {
 			return Map.of("error", "Failed to parse error response");
-		} catch (Exception e) {
-			return Map.of("error", "An unexpected error occurred");
 		}
+		// we quit this to start CB
+		/*
+		 * catch (Exception e) { return Map.of("error", "An unexpected error occurred");
+		 * }
+		 */
 	}
 
 }
