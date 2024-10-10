@@ -1,9 +1,13 @@
 package com.mx.mcsv.auth.entity;
 
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
+@Entity
+@Table(name = "auth_user")
 public class AuthUser {
 	public static class AuthUserBuilder {
 		private int id;
