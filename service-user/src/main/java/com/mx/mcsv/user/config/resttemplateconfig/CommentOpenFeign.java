@@ -10,19 +10,19 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.mx.mcsv.user.dto.CommentRequestDTO;
 
-@FeignClient(name = "service-comments", url = "http://localhost:8083/api/comments")
+@FeignClient(name = "service-comments")
 public interface CommentOpenFeign {
 
-	@DeleteMapping("/{id}/{userId}")
+	@DeleteMapping("/api/comments/{id}/{userId}")
 	public ResponseEntity<?> deleteComment(@PathVariable Long id, @PathVariable Long userId);
 
-	@GetMapping("/by-blog/{id}")
+	@GetMapping("/api/comments/by-blog/{id}")
 	public ResponseEntity<?> getCommentsByBlog(@PathVariable Long id);
 
-	@GetMapping("/by-user/{id}")
+	@GetMapping("/api/comments/by-user/{id}")
 	public ResponseEntity<?> getCommentsByUser(@PathVariable Long id);
 
-	@PostMapping
+	@PostMapping("/api/comments")
 	public ResponseEntity<?> saveComment(@RequestBody CommentRequestDTO comment);
 
 }

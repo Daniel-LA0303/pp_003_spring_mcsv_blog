@@ -5,10 +5,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "service-blog", url = "http://localhost:8082/api/blogs")
+@FeignClient(name = "service-blog")
 public interface BlogOpenFeign {
 
-	@GetMapping("/{id}")
+	@GetMapping("/api/blogs/{id}")
 	public ResponseEntity<?> getBlog(@PathVariable Long id);
 
 }

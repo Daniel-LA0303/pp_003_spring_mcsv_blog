@@ -27,7 +27,7 @@ public class UserBlogServiceImpl {
 		try {
 
 			ResponseEntity<ApiResponse<T, Object>> response = restTemplate.postForEntity(
-					"http://localhost:8082/api/blogs", blog,
+					"http://service-blog/api/blogs", blog,
 					(Class<ApiResponse<T, Object>>) (Class<?>) ApiResponse.class);
 
 			return response.getBody();
@@ -44,7 +44,7 @@ public class UserBlogServiceImpl {
 		try {
 
 			ResponseEntity<ApiResponse<T, Object>> response = restTemplate.exchange(
-					"http://localhost:8082/api/blogs/{id}/{userId}", HttpMethod.DELETE, null,
+					"http://service-blog/api/blogs/{id}/{userId}", HttpMethod.DELETE, null,
 					(Class<ApiResponse<T, Object>>) (Class<?>) ApiResponse.class, id, userId);
 
 			return response.getBody();
@@ -67,7 +67,7 @@ public class UserBlogServiceImpl {
 		try {
 
 			ResponseEntity<ApiResponse<T, Object>> response = restTemplate.getForEntity(
-					"http://localhost:8082/api/blogs/get-blogs-by-id/{id}",
+					"http://service-blog/api/blogs/get-blogs-by-id/{id}",
 					(Class<ApiResponse<T, Object>>) (Class<?>) ApiResponse.class, id);
 
 			return response.getBody();
