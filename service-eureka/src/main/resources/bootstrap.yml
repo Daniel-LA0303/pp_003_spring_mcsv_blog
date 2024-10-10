@@ -1,7 +1,7 @@
 spring:
   application:
-    name: service-comments
+    name: service-eureka
   cloud:
     config:
+      uri: http://localhost:8084
       enabled: true
-      uri: http://localhost:8083
