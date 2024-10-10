@@ -20,6 +20,8 @@ spring:
           uri: lb://service-user
           predicates:
             - Path=/api/users/**
+          filters:
+            - name: AuthFilter
         - id: service-blog
           uri: lb://service-blog
           predicates:
@@ -28,6 +30,10 @@ spring:
           uri: lb://service-comments
           predicates:
             - Path=/api/comments/**
+        - id: service-auth
+          uri: lb://service-auth
+          predicates:
+            - Path=/auth/**
   zipkin:
     base-url: http://localhost:9411
   sleuth:
