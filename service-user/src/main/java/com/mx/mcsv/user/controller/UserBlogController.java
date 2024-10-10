@@ -17,6 +17,8 @@ import com.mx.mcsv.user.exceptions.UserException;
 import com.mx.mcsv.user.service.UserService;
 import com.mx.mcsv.user.service.impl.UserBlogServiceImpl;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+
 @RestController
 @RequestMapping("/api/users/blog")
 public class UserBlogController {
@@ -28,6 +30,7 @@ public class UserBlogController {
 	private UserBlogServiceImpl userBlogService;
 
 	@PostMapping("")
+	@CircuitBreaker(name = "blogCB", fallbackMethod = "fallBackCreateBlogForUser")
 	public ResponseEntity<?> createBlogForUser(@RequestBody BlogRequestDTO blogRequest) throws UserException {
 
 		userService.findById(blogRequest.getUserId());
@@ -39,6 +42,7 @@ public class UserBlogController {
 	}
 
 	@DeleteMapping("/{id}/{userId}")
+	@CircuitBreaker(name = "blogCB", fallbackMethod = "fallBackDeleteBlog")
 	public ResponseEntity<?> deteleBlog(@PathVariable Long id, @PathVariable Long userId) throws UserException {
 
 		userService.findById(userId);
@@ -49,6 +53,7 @@ public class UserBlogController {
 	}
 
 	@GetMapping("/{id}")
+	@CircuitBreaker(name = "blogCB", fallbackMethod = "fallBackGetBlogsByUser")
 	public ResponseEntity<?> getBlogsByUser(@PathVariable Long id) throws UserException {
 
 		userService.findById(id);
@@ -57,6 +62,19 @@ public class UserBlogController {
 
 		return new ResponseEntity<>(apiResponse, HttpStatus.valueOf(apiResponse.getStatus()));
 
+	}
+
+	private ResponseEntity<?> fallBackCreateBlogForUser(BlogRequestDTO blogRequest, RuntimeException e) {
+		return new ResponseEntity<>("Could not create the blog at this time, try later.", HttpStatus.OK);
+	}
+
+	private ResponseEntity<?> fallBackDeleteBlog(Long id, Long userId, RuntimeException e) {
+		return new ResponseEntity<>("The blog could not be deleted at this time.", HttpStatus.OK);
+	}
+
+	// Fallback method for getting blogs by user
+	private ResponseEntity<?> fallBackGetBlogsByUser(Long id, RuntimeException e) {
+		return new ResponseEntity<>("Unable to obtain user blogs at this time.", HttpStatus.OK);
 	}
 
 }

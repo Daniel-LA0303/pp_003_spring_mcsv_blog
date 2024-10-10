@@ -76,6 +76,21 @@
 	      <groupId>org.springframework.cloud</groupId>
 	      <artifactId>spring-cloud-starter-openfeign</artifactId>
 	    </dependency>
+	    
+	    <!-- Circuit breaker -->
+	    <dependency>
+	      <groupId>org.springframework.boot</groupId>
+	      <artifactId>spring-boot-starter-actuator</artifactId>
+	    </dependency>
+	    <dependency>
+	      <groupId>org.springframework.cloud</groupId>
+	      <artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
+	    </dependency>
+		<dependency>
+		    <groupId>org.springframework</groupId>
+		    <artifactId>spring-aop</artifactId>
+		    <version>6.0.23</version>
+		</dependency>
 		
 		<!-- Jackson -->
 		<dependency>
