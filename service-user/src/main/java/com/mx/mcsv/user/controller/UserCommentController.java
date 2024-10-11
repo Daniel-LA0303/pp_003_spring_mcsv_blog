@@ -71,19 +71,29 @@ public class UserCommentController {
 	}
 
 	private ResponseEntity<?> fallBackCreateComment(CommentRequestDTO commentRequestDTO, RuntimeException e) {
-		return new ResponseEntity<>("Unable to create comment at the moment, please try again later.", HttpStatus.OK);
+
+		ApiResponse<Object, String> response = new ApiResponse<>(HttpStatus.SERVICE_UNAVAILABLE.value(), null,
+				"Unable to create comment at the moment, please try //again later");
+		return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatus()));
 	}
 
 	private ResponseEntity<?> fallBackDeleteComment(Long id, Long userId, Long blogId, RuntimeException e) {
-		return new ResponseEntity<>("Unable to delete comment at the moment.", HttpStatus.OK);
+
+		ApiResponse<Object, String> response = new ApiResponse<>(HttpStatus.SERVICE_UNAVAILABLE.value(), null,
+				"Unable to delete comment at the moment.");
+		return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatus()));
 	}
 
 	private ResponseEntity<?> fallBackGetCommentsByBlog(Long id, RuntimeException e) {
-		return new ResponseEntity<>("Unable to retrieve comments for this blog at the moment.", HttpStatus.OK);
+		ApiResponse<Object, String> response = new ApiResponse<>(HttpStatus.SERVICE_UNAVAILABLE.value(), null,
+				"Unable to retrieve comments for this blog at the moment.");
+		return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatus()));
 	}
 
 	private ResponseEntity<?> fallBackGetCommentsByUser(Long id, RuntimeException e) {
-		return new ResponseEntity<>("Unable to retrieve comments for this user at the moment.", HttpStatus.OK);
+		ApiResponse<Object, String> response = new ApiResponse<>(HttpStatus.SERVICE_UNAVAILABLE.value(), null,
+				"Unable to retrieve comments for this user at the moment.");
+		return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatus()));
 	}
 
 }

@@ -65,16 +65,24 @@ public class UserBlogController {
 	}
 
 	private ResponseEntity<?> fallBackCreateBlogForUser(BlogRequestDTO blogRequest, RuntimeException e) {
-		return new ResponseEntity<>("Could not create the blog at this time, try later.", HttpStatus.OK);
+
+		ApiResponse<Object, String> response = new ApiResponse<>(HttpStatus.SERVICE_UNAVAILABLE.value(), null,
+				"The blog could not be deleted at this time.");
+		return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatus()));
 	}
 
 	private ResponseEntity<?> fallBackDeleteBlog(Long id, Long userId, RuntimeException e) {
-		return new ResponseEntity<>("The blog could not be deleted at this time.", HttpStatus.OK);
+
+		ApiResponse<Object, String> response = new ApiResponse<>(HttpStatus.SERVICE_UNAVAILABLE.value(), null,
+				"The blog could not be deleted at this time.");
+		return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatus()));
 	}
 
 	// Fallback method for getting blogs by user
 	private ResponseEntity<?> fallBackGetBlogsByUser(Long id, RuntimeException e) {
-		return new ResponseEntity<>("Unable to obtain user blogs at this time.", HttpStatus.OK);
+		ApiResponse<Object, String> response = new ApiResponse<>(HttpStatus.SERVICE_UNAVAILABLE.value(), null,
+				"Unable to obtain user blogs at this time.");
+		return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatus()));
 	}
 
 }

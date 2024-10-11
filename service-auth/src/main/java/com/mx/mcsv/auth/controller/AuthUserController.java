@@ -22,6 +22,8 @@ import com.mx.mcsv.auth.dto.UserDTO;
 import com.mx.mcsv.auth.exceptions.AuthException;
 import com.mx.mcsv.auth.service.AuthUserService;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+
 @RestController
 @RequestMapping("/auth")
 public class AuthUserController {
@@ -30,6 +32,7 @@ public class AuthUserController {
 	AuthUserService authUserService;
 
 	@PostMapping("/create")
+	@CircuitBreaker(name = "userCB", fallbackMethod = "fallBackCreateUser")
 	public ResponseEntity<?> create(@Valid @RequestBody UserDTO dto, BindingResult result) throws AuthException {
 		if (result.hasErrors()) {
 			return validation(result);
@@ -41,6 +44,7 @@ public class AuthUserController {
 	}
 
 	@PostMapping("/login")
+	@CircuitBreaker(name = "userCB", fallbackMethod = "fallBackLoginUser")
 	public ResponseEntity<?> login(@Valid @RequestBody LoginUserDTO dto, BindingResult result) throws AuthException {
 
 		if (result.hasErrors()) {
@@ -63,6 +67,20 @@ public class AuthUserController {
 		}
 		System.out.println("Es valido");
 		return ResponseEntity.ok(tokenDto);
+	}
+
+	private ResponseEntity<?> fallBackCreateUser(UserDTO dto, RuntimeException e) {
+
+		ApiResponse<Object, String> response = new ApiResponse<>(HttpStatus.SERVICE_UNAVAILABLE.value(), null,
+				"The User could not be created at this time.");
+		return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatus()));
+	}
+
+	private ResponseEntity<?> fallBackLoginUser(UserDTO dto, RuntimeException e) {
+
+		ApiResponse<Object, String> response = new ApiResponse<>(HttpStatus.SERVICE_UNAVAILABLE.value(), null,
+				"The User could not be login at this time.");
+		return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatus()));
 	}
 
 	private ResponseEntity<ApiResponse<Map<String, String>, Map<String, String>>> validation(BindingResult result) {
