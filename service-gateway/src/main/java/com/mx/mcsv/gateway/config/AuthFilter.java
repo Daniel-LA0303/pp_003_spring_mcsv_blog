@@ -1,8 +1,9 @@
 package com.mx.mcsv.gateway.config;
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -25,25 +26,10 @@ import reactor.core.publisher.Mono;
 public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> {
 
 	public static class Config {
-		private String publicMethods;
-		private List<String> paths;
 
-		public List<String> getPaths() {
-			return paths;
-		}
-
-		public String getPublicMethods() {
-			return publicMethods;
-		}
-
-		public void setPaths(List<String> paths) {
-			this.paths = paths;
-		}
-
-		public void setPublicMethods(String publicMethods) {
-			this.publicMethods = publicMethods;
-		}
 	}
+
+	private static final Logger logger = LoggerFactory.getLogger(AuthFilter.class);
 
 	private final WebClient.Builder webClient;
 
@@ -57,12 +43,10 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
 		return (((exchange, chain) -> {
 
 			String currentMethod = exchange.getRequest().getMethodValue();
-			String requestPath = exchange.getRequest().getURI().getPath();
 
-			boolean isPublicMethod = config.getPublicMethods().equals("GET");
-			boolean isPublicPath = config.getPaths().stream().anyMatch(requestPath::equals);
-
-			if (isPublicMethod || isPublicPath) {
+			// Si el método es GET, permitimos el acceso directamente
+			if ("GET".equalsIgnoreCase(currentMethod)) {
+				logger.info("Método GET - acceso permitido sin autenticación");
 				return chain.filter(exchange);
 			}
 

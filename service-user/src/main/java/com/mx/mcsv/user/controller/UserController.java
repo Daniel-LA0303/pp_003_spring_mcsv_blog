@@ -55,6 +55,13 @@ public class UserController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
+	@GetMapping("/get-by-email/{email}")
+	public ResponseEntity<?> getUserByEmail(@PathVariable String email) throws UserException {
+		User user = userService.getUserByEmail(email);
+		ApiResponse<User, String> response = new ApiResponse<>(200, user, null);
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+
 	@PostMapping("/new-user")
 	public ResponseEntity<?> saveUser(@Valid @RequestBody User user, BindingResult result) throws UserException {
 
@@ -64,7 +71,7 @@ public class UserController {
 
 		UserDTO userDTO = userService.save(user);
 		ApiResponse<UserDTO, String> response = new ApiResponse<>(201, userDTO, null);
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 
 	}
 

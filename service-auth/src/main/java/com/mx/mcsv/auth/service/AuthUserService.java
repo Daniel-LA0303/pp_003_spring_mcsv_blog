@@ -1,7 +1,6 @@
 package com.mx.mcsv.auth.service;
 
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,10 +13,10 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mx.mcsv.auth.dto.ApiResponse;
-import com.mx.mcsv.auth.dto.AuthUserDto;
-import com.mx.mcsv.auth.dto.NewUserDTO;
+import com.mx.mcsv.auth.dto.LoginUserDTO;
 import com.mx.mcsv.auth.dto.TokenDto;
-import com.mx.mcsv.auth.entity.AuthUser;
+import com.mx.mcsv.auth.dto.UserDTO;
+import com.mx.mcsv.auth.dto.UserResponseDTO;
 import com.mx.mcsv.auth.exceptions.AuthException;
 import com.mx.mcsv.auth.repository.AuthUserRepository;
 import com.mx.mcsv.auth.security.JwtProvider;
@@ -39,20 +38,37 @@ public class AuthUserService {
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
-	public TokenDto login(AuthUserDto dto) throws AuthException {
+	public <T> ApiResponse<TokenDto, Object> login(LoginUserDTO dto) throws AuthException {
 
-		Optional<AuthUser> user = authUserRepository.findByUserName(dto.getUserName());
-		if (!user.isPresent()) {
-			throw new AuthException("Username not found", HttpStatus.NOT_FOUND);
-		}
+		try {
+			ResponseEntity<ApiResponse<T, Object>> responseUserEmail = restTemplate.getForEntity(
+					"http://service-user/api/users/get-by-email/{email}",
+					(Class<ApiResponse<T, Object>>) (Class<?>) ApiResponse.class, dto.getEmail());
 
-		if (!passwordEncoder.matches(dto.getPassword(), user.get().getPassword())) {
-			throw new AuthException("Password incorrect", HttpStatus.BAD_REQUEST);
+			ApiResponse<T, Object> apiResponse = responseUserEmail.getBody();
+			String json = apiResponse.getData().toString();
+
+			UserResponseDTO userResponseDTO = convertToUserResponseDTO(json);
+
+			if (!passwordEncoder.matches(dto.getPassword(), userResponseDTO.getPassword())) {
+				System.out.println("Password incorrecta");
+				throw new AuthException("Password incorrect", HttpStatus.BAD_REQUEST);
+			}
+
+			String token = jwtProvider.createToken(userResponseDTO);
+			TokenDto tokenDto = new TokenDto(token);
+
+			return new ApiResponse<>(HttpStatus.OK.value(), tokenDto, null);
+
+		} catch (HttpClientErrorException e) {
+			String errorMessage = e.getMessage();
+			Object errorDetails = extractError(errorMessage);
+
+			return new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), null, errorDetails);
 		}
-		return new TokenDto(jwtProvider.createToken(user.get()));
 	}
 
-	public <T> ApiResponse<T, Object> save(NewUserDTO dto) throws AuthException {
+	public <T> ApiResponse<T, Object> save(UserDTO dto) throws AuthException {
 
 		try {
 
@@ -76,15 +92,37 @@ public class AuthUserService {
 
 	}
 
-	public TokenDto validate(String token) {
+	public <T> TokenDto validate(String token) {
 		if (!jwtProvider.validate(token)) {
+			System.out.println("***** No es valido");
 			return null;
 		}
-		String username = jwtProvider.getUserNameFromToken(token);
-		if (!authUserRepository.findByUserName(username).isPresent()) {
+		String email = jwtProvider.getEmailFromToken(token);
+
+		ResponseEntity<ApiResponse<T, Object>> responseUserEmail = restTemplate.getForEntity(
+				"http://service-user/api/users/get-by-email/{email}",
+				(Class<ApiResponse<T, Object>>) (Class<?>) ApiResponse.class, email);
+
+		ApiResponse<T, Object> apiResponse = responseUserEmail.getBody();
+		String json = apiResponse.getData().toString();
+
+		UserResponseDTO userResponseDTO = convertToUserResponseDTO(json);
+
+		if (!userResponseDTO.getEmail().equals(email)) {
+			System.out.println("No es el mismo email fallo token");
 			return null;
 		}
 		return new TokenDto(token);
+	}
+
+	private UserResponseDTO convertToUserResponseDTO(String json) {
+		UserResponseDTO userResponseDTO = new UserResponseDTO();
+		userResponseDTO.setId(Long.parseLong(getValue(json, "id")));
+		userResponseDTO.setName(getValue(json, "name"));
+		userResponseDTO.setUsername(getValue(json, "username"));
+		userResponseDTO.setEmail(getValue(json, "email"));
+		userResponseDTO.setPassword(getValue(json, "password"));
+		return userResponseDTO;
 	}
 
 	private Object extractError(String errorResponse) {
@@ -103,5 +141,18 @@ public class AuthUserService {
 		} catch (JsonProcessingException e) {
 			return Map.of("error", "Failed to parse error response");
 		}
+	}
+
+	private String getValue(String input, String key) {
+		String searchKey = key + "=";
+		int startIndex = input.indexOf(searchKey) + searchKey.length();
+		int endIndex = input.indexOf(",", startIndex);
+
+		if (endIndex == -1) {
+			endIndex = input.indexOf("}", startIndex);
+		}
+
+		String value = input.substring(startIndex, endIndex).trim();
+		return value;
 	}
 }

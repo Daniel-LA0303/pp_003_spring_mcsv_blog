@@ -14,6 +14,8 @@ public interface UserService {
 
 	UserDTO findById(Long id) throws UserException;
 
+	User getUserByEmail(String email) throws UserException;
+
 	UserDTO save(User user) throws UserException;
 
 	UserDTO update(Long id, User user) throws UserException;

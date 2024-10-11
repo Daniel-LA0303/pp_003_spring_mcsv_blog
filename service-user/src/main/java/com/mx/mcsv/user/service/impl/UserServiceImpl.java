@@ -54,6 +54,24 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public User getUserByEmail(String email) throws UserException {
+		Optional<User> userO = userRepository.findByEmail(email);
+
+		if (userO.isPresent()) {
+			User user = new User();
+			user.setEmail(userO.get().getEmail());
+			user.setId(userO.get().getId());
+			user.setName(userO.get().getName());
+			user.setUsername(userO.get().getUsername());
+			user.setPassword(userO.get().getPassword());
+
+			return user;
+		}
+
+		throw new UserException("User not found with email: " + email, HttpStatus.NOT_FOUND);
+	}
+
+	@Override
 	public UserDTO save(User user) throws UserException {
 
 		Optional<User> userDB = userRepository.findByEmail(user.getEmail());

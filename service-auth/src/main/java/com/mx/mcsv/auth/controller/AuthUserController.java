@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mx.mcsv.auth.dto.ApiResponse;
-import com.mx.mcsv.auth.dto.AuthUserDto;
-import com.mx.mcsv.auth.dto.NewUserDto;
+import com.mx.mcsv.auth.dto.LoginUserDTO;
 import com.mx.mcsv.auth.dto.TokenDto;
+import com.mx.mcsv.auth.dto.UserDTO;
 import com.mx.mcsv.auth.exceptions.AuthException;
 import com.mx.mcsv.auth.service.AuthUserService;
 
@@ -30,7 +30,7 @@ public class AuthUserController {
 	AuthUserService authUserService;
 
 	@PostMapping("/create")
-	public ResponseEntity<?> create(@Valid @RequestBody NewUserDto dto, BindingResult result) throws AuthException {
+	public ResponseEntity<?> create(@Valid @RequestBody UserDTO dto, BindingResult result) throws AuthException {
 		if (result.hasErrors()) {
 			return validation(result);
 		}
@@ -41,24 +41,27 @@ public class AuthUserController {
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity<?> login(@Valid @RequestBody AuthUserDto dto, BindingResult result) throws AuthException {
+	public ResponseEntity<?> login(@Valid @RequestBody LoginUserDTO dto, BindingResult result) throws AuthException {
 
 		if (result.hasErrors()) {
 			return validation(result);
 		}
-		TokenDto tokenDto = authUserService.login(dto);
+		ApiResponse<TokenDto, Object> response = authUserService.login(dto);
 
-		ApiResponse<TokenDto, String> response = new ApiResponse<>(200, tokenDto, null);
-		return new ResponseEntity<>(response, HttpStatus.OK);
+		return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatus()));
 
 	}
 
 	@PostMapping("/validate")
 	public ResponseEntity<TokenDto> validate(@RequestParam String token) {
+		System.out.println("***** TOKEN VALIDATE");
+		System.out.println(token);
 		TokenDto tokenDto = authUserService.validate(token);
+		System.out.println(tokenDto.getToken());
 		if (tokenDto == null) {
 			return ResponseEntity.badRequest().build();
 		}
+		System.out.println("Es valido");
 		return ResponseEntity.ok(tokenDto);
 	}
 
