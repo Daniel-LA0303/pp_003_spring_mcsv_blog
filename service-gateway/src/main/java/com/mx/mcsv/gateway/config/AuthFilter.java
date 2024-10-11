@@ -1,6 +1,7 @@
 package com.mx.mcsv.gateway.config;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -24,9 +25,27 @@ import reactor.core.publisher.Mono;
 public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> {
 
 	public static class Config {
+		private String publicMethods;
+		private List<String> paths;
+
+		public List<String> getPaths() {
+			return paths;
+		}
+
+		public String getPublicMethods() {
+			return publicMethods;
+		}
+
+		public void setPaths(List<String> paths) {
+			this.paths = paths;
+		}
+
+		public void setPublicMethods(String publicMethods) {
+			this.publicMethods = publicMethods;
+		}
 	}
 
-	private WebClient.Builder webClient;
+	private final WebClient.Builder webClient;
 
 	public AuthFilter(WebClient.Builder webClient) {
 		super(Config.class);
@@ -36,6 +55,17 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
 	@Override
 	public GatewayFilter apply(Config config) {
 		return (((exchange, chain) -> {
+
+			String currentMethod = exchange.getRequest().getMethodValue();
+			String requestPath = exchange.getRequest().getURI().getPath();
+
+			boolean isPublicMethod = config.getPublicMethods().equals("GET");
+			boolean isPublicPath = config.getPaths().stream().anyMatch(requestPath::equals);
+
+			if (isPublicMethod || isPublicPath) {
+				return chain.filter(exchange);
+			}
+
 			if (!exchange.getRequest().getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
 				return onError(exchange, "Missing Authorization Header", HttpStatus.BAD_REQUEST);
 			}

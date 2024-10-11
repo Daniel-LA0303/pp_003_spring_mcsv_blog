@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mx.mcsv.auth.dto.ApiResponse;
 import com.mx.mcsv.auth.dto.AuthUserDto;
+import com.mx.mcsv.auth.dto.NewUserDto;
 import com.mx.mcsv.auth.dto.TokenDto;
-import com.mx.mcsv.auth.entity.AuthUser;
 import com.mx.mcsv.auth.exceptions.AuthException;
 import com.mx.mcsv.auth.service.AuthUserService;
 
@@ -30,15 +30,14 @@ public class AuthUserController {
 	AuthUserService authUserService;
 
 	@PostMapping("/create")
-	public ResponseEntity<?> create(@Valid @RequestBody AuthUserDto dto, BindingResult result) throws AuthException {
+	public ResponseEntity<?> create(@Valid @RequestBody NewUserDto dto, BindingResult result) throws AuthException {
 		if (result.hasErrors()) {
 			return validation(result);
 		}
 
-		AuthUser authUser = authUserService.save(dto);
+		ApiResponse<Object, Object> apiResponse = authUserService.save(dto);
 
-		ApiResponse<AuthUser, String> response = new ApiResponse<>(201, authUser, null);
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+		return new ResponseEntity<>(apiResponse, HttpStatus.valueOf(apiResponse.getStatus()));
 	}
 
 	@PostMapping("/login")

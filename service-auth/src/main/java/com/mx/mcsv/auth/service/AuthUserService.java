@@ -1,13 +1,21 @@
 package com.mx.mcsv.auth.service;
 
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mx.mcsv.auth.dto.ApiResponse;
 import com.mx.mcsv.auth.dto.AuthUserDto;
+import com.mx.mcsv.auth.dto.NewUserDTO;
 import com.mx.mcsv.auth.dto.TokenDto;
 import com.mx.mcsv.auth.entity.AuthUser;
 import com.mx.mcsv.auth.exceptions.AuthException;
@@ -24,7 +32,12 @@ public class AuthUserService {
 	PasswordEncoder passwordEncoder;
 
 	@Autowired
+	private RestTemplate restTemplate;
+
+	@Autowired
 	JwtProvider jwtProvider;
+
+	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	public TokenDto login(AuthUserDto dto) throws AuthException {
 
@@ -39,14 +52,28 @@ public class AuthUserService {
 		return new TokenDto(jwtProvider.createToken(user.get()));
 	}
 
-	public AuthUser save(AuthUserDto dto) throws AuthException {
-		Optional<AuthUser> user = authUserRepository.findByUserName(dto.getUserName());
-		if (user.isPresent()) {
-			throw new AuthException("Username already in use by another user", HttpStatus.BAD_REQUEST);
+	public <T> ApiResponse<T, Object> save(NewUserDTO dto) throws AuthException {
+
+		try {
+
+			String password = passwordEncoder.encode(dto.getPassword());
+
+			dto.setPassword(password);
+
+			ResponseEntity<ApiResponse<T, Object>> response = restTemplate.postForEntity(
+					"http://service-user/api/users/new-user", dto,
+					(Class<ApiResponse<T, Object>>) (Class<?>) ApiResponse.class);
+
+			return response.getBody();
+
+		} catch (HttpClientErrorException e) {
+			String errorMessage = e.getMessage();
+
+			Object errorDetails = extractError(errorMessage);
+
+			return new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), null, errorDetails);
 		}
-		String password = passwordEncoder.encode(dto.getPassword());
-		AuthUser authUser = AuthUser.builder().userName(dto.getUserName()).password(password).build();
-		return authUserRepository.save(authUser);
+
 	}
 
 	public TokenDto validate(String token) {
@@ -58,5 +85,23 @@ public class AuthUserService {
 			return null;
 		}
 		return new TokenDto(token);
+	}
+
+	private Object extractError(String errorResponse) {
+		try {
+
+			String cleanedErrorResponse = errorResponse.substring(errorResponse.indexOf("{"),
+					errorResponse.lastIndexOf("}") + 1);
+
+			Map<String, Object> errorMap = objectMapper.readValue(cleanedErrorResponse, Map.class);
+
+			if (errorMap.containsKey("error")) {
+				return errorMap.get("error");
+			} else {
+				return Map.of("error", "No error information found");
+			}
+		} catch (JsonProcessingException e) {
+			return Map.of("error", "Failed to parse error response");
+		}
 	}
 }

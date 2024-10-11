@@ -55,7 +55,7 @@ public class UserController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	@PostMapping
+	@PostMapping("/new-user")
 	public ResponseEntity<?> saveUser(@Valid @RequestBody User user, BindingResult result) throws UserException {
 
 		if (result.hasErrors()) {

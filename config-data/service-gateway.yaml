@@ -22,6 +22,10 @@ spring:
             - Path=/api/users/**
           filters:
             - name: AuthFilter
+              args:
+                publicMethods: 'GET'
+                paths: 
+                  - '/api/users/new-user'
         - id: service-blog
           uri: lb://service-blog
           predicates:
