@@ -44,7 +44,6 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
 
 			String currentMethod = exchange.getRequest().getMethodValue();
 
-			// Si el método es GET, permitimos el acceso directamente
 			if ("GET".equalsIgnoreCase(currentMethod)) {
 				logger.info("Método GET - acceso permitido sin autenticación");
 				return chain.filter(exchange);

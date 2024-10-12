@@ -58,25 +58,20 @@ public class AuthUserController {
 
 	@PostMapping("/validate")
 	public ResponseEntity<TokenDto> validate(@RequestParam String token) {
-		System.out.println("***** TOKEN VALIDATE");
-		System.out.println(token);
 		TokenDto tokenDto = authUserService.validate(token);
-		System.out.println(tokenDto.getToken());
 		if (tokenDto == null) {
 			return ResponseEntity.badRequest().build();
 		}
-		System.out.println("Es valido");
 		return ResponseEntity.ok(tokenDto);
 	}
 
-	private ResponseEntity<?> fallBackCreateUser(UserDTO dto, RuntimeException e) {
-
+	private ResponseEntity<?> fallBackCreateUser(UserDTO dto, BindingResult result, Throwable e) {
 		ApiResponse<Object, String> response = new ApiResponse<>(HttpStatus.SERVICE_UNAVAILABLE.value(), null,
-				"The User could not be created at this time.");
+				"The User could not be created at this time due to an error.");
 		return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatus()));
 	}
 
-	private ResponseEntity<?> fallBackLoginUser(UserDTO dto, RuntimeException e) {
+	private ResponseEntity<?> fallBackLoginUser(LoginUserDTO dto, BindingResult result, Throwable e) {
 
 		ApiResponse<Object, String> response = new ApiResponse<>(HttpStatus.SERVICE_UNAVAILABLE.value(), null,
 				"The User could not be login at this time.");

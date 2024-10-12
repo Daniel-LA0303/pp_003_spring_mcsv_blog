@@ -37,7 +37,6 @@ public class UserBlogController {
 
 		ApiResponse<Object, Object> apiResponse = userBlogService.createBlog(blogRequest);
 
-		// HttpStatus status = HttpStatus.valueOf(apiResponse.getStatus());
 		return new ResponseEntity<>(apiResponse, HttpStatus.valueOf(apiResponse.getStatus()));
 	}
 
@@ -67,7 +66,7 @@ public class UserBlogController {
 	private ResponseEntity<?> fallBackCreateBlogForUser(BlogRequestDTO blogRequest, RuntimeException e) {
 
 		ApiResponse<Object, String> response = new ApiResponse<>(HttpStatus.SERVICE_UNAVAILABLE.value(), null,
-				"The blog could not be deleted at this time.");
+				"The blog could not be created at this time.");
 		return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatus()));
 	}
 

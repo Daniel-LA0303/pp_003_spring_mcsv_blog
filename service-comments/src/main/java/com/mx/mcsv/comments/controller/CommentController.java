@@ -88,7 +88,7 @@ public class CommentController {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<?> updateController(@PathVariable Long id, @Valid @RequestBody Comment comment,
+	public ResponseEntity<?> updateComment(@PathVariable Long id, @Valid @RequestBody Comment comment,
 			BindingResult result) throws CommentException {
 
 		if (result.hasErrors()) {
