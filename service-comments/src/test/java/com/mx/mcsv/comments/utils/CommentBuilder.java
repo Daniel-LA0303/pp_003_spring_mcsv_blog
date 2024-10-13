@@ -53,6 +53,11 @@ public class CommentBuilder {
 		return comment;
 	}
 
+	public Comment build2() {
+		Comment comment = new Comment(id, userId, blogId, content, createdAt, updatedAt);
+		return comment;
+	}
+
 	/**
 	 * set the value of the property blogId
 	 *

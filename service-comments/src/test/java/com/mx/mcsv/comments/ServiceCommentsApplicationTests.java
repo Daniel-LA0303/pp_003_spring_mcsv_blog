@@ -10,4 +10,9 @@ class ServiceCommentsApplicationTests {
 	void contextLoads() {
 	}
 
+	@Test
+	public void main() {
+		ServiceCommentsApplication.main(new String[] {});
+	}
+
 }
