@@ -23,19 +23,19 @@ public class Blog {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotBlank
-	@Column(name = "title", unique = true)
+	@NotBlank(message = "The field title must not be blank")
+	@Column(name = "title")
 	private String title;
 
-	@NotBlank
+	@NotBlank(message = "The field description must not be blank")
 	@Column(name = "description")
 	private String description;
 
-	@NotBlank
+	@NotBlank(message = "The field content must not be blank")
 	@Column(name = "content")
 	private String content;
 
-	@NotNull
+	@NotNull(message = "The field userId must not be null")
 	@Column(name = "user_id")
 	private Long userId;
 

@@ -105,7 +105,7 @@ public class CommentController {
 		Map<String, String> errorsMap = new HashMap<>();
 
 		result.getFieldErrors().forEach(err -> {
-			errorsMap.put(err.getField(), "The field " + err.getField() + " " + err.getDefaultMessage());
+			errorsMap.put(err.getField(), err.getDefaultMessage());
 		});
 
 		ApiResponse<Map<String, String>, Map<String, String>> apiResponse = new ApiResponse<>(400, null, errorsMap);

@@ -19,15 +19,15 @@ public class Comment {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotNull
+	@NotNull(message = "The field userId must not be null")
 	@Column(name = "user_id")
 	private Long userId;
 
-	@NotNull
+	@NotNull(message = "The field blogId must not be null")
 	@Column(name = "blog_id")
 	private Long blogId;
 
-	@NotBlank
+	@NotBlank(message = "The field content must not be blank")
 	@Column(name = "content")
 	private String content;
 

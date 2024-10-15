@@ -30,10 +30,11 @@
 		<java.version>17</java.version>
 		<spring-cloud.version>2021.0.5</spring-cloud.version>
 		
-		<!-- Sonar-->
+		
 		<maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-
+		
+		<!-- Sonar-->
         <sonar.projectKey>service-comments</sonar.projectKey>
         <sonar.projectName>service-comments</sonar.projectName>
         <sonar.host.url>http://localhost:9000</sonar.host.url>

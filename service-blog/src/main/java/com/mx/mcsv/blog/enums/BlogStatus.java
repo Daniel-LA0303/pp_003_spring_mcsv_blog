@@ -10,12 +10,4 @@ public enum BlogStatus {
 	BlogStatus(String description) {
 		this.description = description;
 	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public String getReadableName() {
-		return name().charAt(0) + name().substring(1).toLowerCase();
-	}
 }

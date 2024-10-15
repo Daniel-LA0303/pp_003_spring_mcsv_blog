@@ -1,4 +1,4 @@
-package com.mx.mcsv.comments.services;
+package com.mx.mcsv.blog.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -25,16 +25,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
-import com.mx.mcsv.comments.dto.ApiResponse;
-import com.mx.mcsv.comments.entity.Comment;
-import com.mx.mcsv.comments.exceptions.ErrorDetail;
-import com.mx.mcsv.comments.utils.CommentBuilder;
+import com.mx.mcsv.blog.dto.ApiResponse;
+import com.mx.mcsv.blog.entity.Blog;
+import com.mx.mcsv.blog.exception.ErrorDetail;
+import com.mx.mcsv.blog.utils.BlogBuilder;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(scripts = "/import.sql")
 @ActiveProfiles("test")
-public class CommentServiceTestException {
+public class BlogServiceTestException {
 
 	@Autowired
 	private TestRestTemplate testRestTemplate;
@@ -42,22 +42,24 @@ public class CommentServiceTestException {
 	@LocalServerPort
 	private int port;
 
-	Comment invalidComment;
+	Blog invalidBlog;
 
-	Comment validComment;
+	Blog validBlog;
+
+	Blog duplicateBlog;
 
 	HttpHeaders headers;
 
 	@Test
-	void deleteCommentTestNotFound() {
-		long nonexistentCommentId = 999L;
+	void deleteBlogTestNotFound() {
+		long nonexistentBlogId = 999L;
 		long userId = 1L;
 
 		ParameterizedTypeReference<ApiResponse<String, ErrorDetail>> responseType = new ParameterizedTypeReference<ApiResponse<String, ErrorDetail>>() {
 		};
 
-		ResponseEntity<ApiResponse<String, ErrorDetail>> response = testRestTemplate.exchange(
-				"/api/comments/" + nonexistentCommentId + "/" + userId, HttpMethod.DELETE, null, responseType);
+		ResponseEntity<ApiResponse<String, ErrorDetail>> response = testRestTemplate
+				.exchange("/api/blogs/" + nonexistentBlogId + "/" + userId, HttpMethod.DELETE, null, responseType);
 
 		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 
@@ -69,21 +71,21 @@ public class CommentServiceTestException {
 		assertNull(apiResponse.getData());
 
 		ErrorDetail errorDetail = apiResponse.geterror();
-		assertEquals("Comment Error", errorDetail.getError());
-		assertEquals("Comment not found with id: " + nonexistentCommentId, errorDetail.getMessage());
+		assertEquals("Blog Error", errorDetail.getError());
+		assertEquals("Blog not found with id: " + nonexistentBlogId, errorDetail.getMessage());
 		assertNotNull(errorDetail.getTimeStamp());
 	}
 
 	@Test
-	void deleteCommentTestUserIdMismatch() {
-		long commentId = 1L;
-		long incorrectUserId = 2L;
+	void deleteBlogTestUserIdMismatch() {
+		long blogId = 2L;
+		long incorrectUserId = 999L;
 
 		ParameterizedTypeReference<ApiResponse<String, ErrorDetail>> responseType = new ParameterizedTypeReference<ApiResponse<String, ErrorDetail>>() {
 		};
 
 		ResponseEntity<ApiResponse<String, ErrorDetail>> response = testRestTemplate
-				.exchange("/api/comments/" + commentId + "/" + incorrectUserId, HttpMethod.DELETE, null, responseType);
+				.exchange("/api/blogs/" + blogId + "/" + incorrectUserId, HttpMethod.DELETE, null, responseType);
 
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 
@@ -95,20 +97,21 @@ public class CommentServiceTestException {
 		assertNull(apiResponse.getData());
 
 		ErrorDetail errorDetail = apiResponse.geterror();
-		assertEquals("Comment Error", errorDetail.getError());
-		assertEquals("You do not have permissions to delete comments of others users", errorDetail.getMessage());
+		assertEquals("Blog Error", errorDetail.getError());
+		assertEquals("You do not have permissions to delete blogs of others users or user not found: ",
+				errorDetail.getMessage());
 		assertNotNull(errorDetail.getTimeStamp());
 	}
 
 	@Test
-	void getCommentTestNotFound() {
-		long nonexistentCommentId = 999L;
+	void getBlogTestNotFound() {
+		long nonexistentBlogId = 999L;
 
 		ParameterizedTypeReference<ApiResponse<String, ErrorDetail>> responseType = new ParameterizedTypeReference<ApiResponse<String, ErrorDetail>>() {
 		};
 
 		ResponseEntity<ApiResponse<String, ErrorDetail>> response = testRestTemplate
-				.exchange("/api/comments/" + nonexistentCommentId, HttpMethod.GET, null, responseType);
+				.exchange("/api/blogs/" + nonexistentBlogId, HttpMethod.GET, null, responseType);
 
 		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 
@@ -120,30 +123,32 @@ public class CommentServiceTestException {
 		assertNull(apiResponse.getData());
 
 		ErrorDetail errorDetail = apiResponse.geterror();
-		assertEquals("Comment Error", errorDetail.getError());
-		assertEquals("Comment not found with id: " + nonexistentCommentId, errorDetail.getMessage());
+		assertEquals("Blog Error", errorDetail.getError());
+		assertEquals("Blog not found with id: " + nonexistentBlogId, errorDetail.getMessage());
 		assertNotNull(errorDetail.getTimeStamp());
 	}
 
 	@BeforeEach
 	void setUp() {
 
-		validComment = CommentBuilder.withAllDymmuy().setBlogId(5L).setId(null).setUserId(1L)
-				.setContent("Este es un comentario de prueba").build2();
+		validBlog = BlogBuilder.withAllDummy().setTitle(
+				"Sustainability in Business', 'How companies can integrate sustainability into their business models.")
+				.setContent("Exploring the impact of technology on daily life and future trends.").setUserId(1L)
+				.setId(null).build2();
 
-		invalidComment = CommentBuilder.withAllDymmuy().setBlogId(null).setId(null).setUserId(null).setContent("")
-				.build2();
+		invalidBlog = BlogBuilder.withAllDummy().setTitle("").setDescription(null).setContent("").setUserId(null)
+				.setId(null).build2();
 
 		headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 	}
 
 	@Test
-	void testSaveCommentValidationErrors() {
-		HttpEntity<Comment> requestEntity = new HttpEntity<>(invalidComment, headers);
+	void testSaveBlogValidationErrors() {
+		HttpEntity<Blog> requestEntity = new HttpEntity<>(invalidBlog, headers);
 
 		ResponseEntity<ApiResponse<Map<String, String>, Map<String, String>>> response = testRestTemplate.exchange(
-				"/api/comments", HttpMethod.POST, requestEntity,
+				"/api/blogs", HttpMethod.POST, requestEntity,
 				new ParameterizedTypeReference<ApiResponse<Map<String, String>, Map<String, String>>>() {
 				});
 
@@ -153,25 +158,33 @@ public class CommentServiceTestException {
 		assertNotNull(apiResponse);
 
 		assertEquals(400, apiResponse.getStatus());
+
 		assertNull(apiResponse.getData());
+
 		Map<String, String> errorMap = apiResponse.geterror();
 		assertNotNull(errorMap);
-		assertTrue(errorMap.containsKey("userId"));
-		assertTrue(errorMap.containsKey("blogId"));
-		assertTrue(errorMap.containsKey("content"));
 
-		assertEquals("The field userId must not be null", errorMap.get("userId"));
-		assertEquals("The field blogId must not be null", errorMap.get("blogId"));
+		assertTrue(errorMap.containsKey("title"));
+		assertTrue(errorMap.containsKey("description"));
+		assertTrue(errorMap.containsKey("content"));
+		assertTrue(errorMap.containsKey("userId"));
+
+		System.out.println("******");
+		System.out.println(errorMap.get("title"));
+
+		assertEquals("The field title must not be blank", errorMap.get("title"));
+		assertEquals("The field description must not be blank", errorMap.get("description"));
 		assertEquals("The field content must not be blank", errorMap.get("content"));
+		assertEquals("The field userId must not be null", errorMap.get("userId"));
 
 		assertNotNull(apiResponse.getTimeStamp());
 	}
 
 	@Test
-	void testUpdateCommentNotFound() {
-		HttpEntity<Comment> requestEntity = new HttpEntity<>(validComment, headers);
+	void testUpdateBlogNotFound() {
+		HttpEntity<Blog> requestEntity = new HttpEntity<>(validBlog, headers);
 
-		ResponseEntity<ApiResponse<String, ErrorDetail>> response = testRestTemplate.exchange("/api/comments/999",
+		ResponseEntity<ApiResponse<String, ErrorDetail>> response = testRestTemplate.exchange("/api/blogs/999",
 				HttpMethod.PUT, requestEntity, new ParameterizedTypeReference<ApiResponse<String, ErrorDetail>>() {
 				});
 
@@ -185,18 +198,18 @@ public class CommentServiceTestException {
 
 		ErrorDetail errorDetail = apiResponse.geterror();
 		assertNotNull(errorDetail);
-		assertEquals("Comment Error", errorDetail.getError());
-		assertEquals("Comment not found with id: 999", errorDetail.getMessage());
+		assertEquals("Blog Error", errorDetail.getError());
+		assertEquals("Blog not found with id: 999", errorDetail.getMessage());
 
 		assertNotNull(apiResponse.getTimeStamp());
 	}
 
 	@Test
-	void testUpdateCommentValidationErrors() {
-		HttpEntity<Comment> requestEntity = new HttpEntity<>(invalidComment, headers);
+	void testupdateBlogValidationErrors() {
+		HttpEntity<Blog> requestEntity = new HttpEntity<>(invalidBlog, headers);
 
 		ResponseEntity<ApiResponse<Map<String, String>, Map<String, String>>> response = testRestTemplate.exchange(
-				"/api/comments/1", HttpMethod.PUT, requestEntity,
+				"/api/blogs/1", HttpMethod.PUT, requestEntity,
 				new ParameterizedTypeReference<ApiResponse<Map<String, String>, Map<String, String>>>() {
 				});
 
@@ -206,16 +219,21 @@ public class CommentServiceTestException {
 		assertNotNull(apiResponse);
 
 		assertEquals(400, apiResponse.getStatus());
+
 		assertNull(apiResponse.getData());
+
 		Map<String, String> errorMap = apiResponse.geterror();
 		assertNotNull(errorMap);
-		assertTrue(errorMap.containsKey("userId"));
-		assertTrue(errorMap.containsKey("blogId"));
-		assertTrue(errorMap.containsKey("content"));
 
-		assertEquals("The field userId must not be null", errorMap.get("userId"));
-		assertEquals("The field blogId must not be null", errorMap.get("blogId"));
+		assertTrue(errorMap.containsKey("title"));
+		assertTrue(errorMap.containsKey("description"));
+		assertTrue(errorMap.containsKey("content"));
+		assertTrue(errorMap.containsKey("userId"));
+
+		assertEquals("The field title must not be blank", errorMap.get("title"));
+		assertEquals("The field description must not be blank", errorMap.get("description"));
 		assertEquals("The field content must not be blank", errorMap.get("content"));
+		assertEquals("The field userId must not be null", errorMap.get("userId"));
 
 		assertNotNull(apiResponse.getTimeStamp());
 	}
