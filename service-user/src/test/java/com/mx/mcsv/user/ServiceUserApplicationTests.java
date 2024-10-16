@@ -7,6 +7,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 class ServiceUserApplicationTests {
 
 	@Test
+	public void main() {
+		ServiceUserApplication.main(new String[] {});
+	}
+
+	@Test
 	void contextLoads() {
 	}
 

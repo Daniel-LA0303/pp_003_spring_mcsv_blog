@@ -1,4 +1,4 @@
-package com.mx.mcsv.blog.services;
+package com.mx.mcsv.user.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,16 +26,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
-import com.mx.mcsv.blog.dto.ApiResponse;
-import com.mx.mcsv.blog.entity.Blog;
-import com.mx.mcsv.blog.exception.ErrorDetail;
-import com.mx.mcsv.blog.utils.BlogBuilder;
+import com.mx.mcsv.user.dto.ApiResponse;
+import com.mx.mcsv.user.entity.User;
+import com.mx.mcsv.user.exceptions.ErrorDetail;
+import com.mx.mcsv.user.utils.UserBuilder;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(scripts = "/import.sql")
 @ActiveProfiles("test")
-public class BlogServiceTestException {
+public class UserServiceTestException {
 
 	@Autowired
 	private TestRestTemplate testRestTemplate;
@@ -42,24 +43,21 @@ public class BlogServiceTestException {
 	@LocalServerPort
 	private int port;
 
-	Blog invalidBlog;
-
-	Blog validBlog;
-
-	Blog duplicateBlog;
-
 	HttpHeaders headers;
 
+	User validUser;
+
+	User invalidUser;
+
 	@Test
-	void deleteBlogTestNotFound() {
-		long nonexistentBlogId = 999L;
-		long userId = 1L;
+	void deleteUserTestNotFound() {
+		long userId = 999L;
 
 		ParameterizedTypeReference<ApiResponse<String, ErrorDetail>> responseType = new ParameterizedTypeReference<ApiResponse<String, ErrorDetail>>() {
 		};
 
-		ResponseEntity<ApiResponse<String, ErrorDetail>> response = testRestTemplate
-				.exchange("/api/blogs/" + nonexistentBlogId + "/" + userId, HttpMethod.DELETE, null, responseType);
+		ResponseEntity<ApiResponse<String, ErrorDetail>> response = testRestTemplate.exchange("/api/users/" + userId,
+				HttpMethod.DELETE, null, responseType);
 
 		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 
@@ -71,47 +69,46 @@ public class BlogServiceTestException {
 		assertNull(apiResponse.getData());
 
 		ErrorDetail errorDetail = apiResponse.geterror();
-		assertEquals("Blog Error", errorDetail.getError());
-		assertEquals("Blog not found with id: " + nonexistentBlogId, errorDetail.getMessage());
+		assertEquals("User Error", errorDetail.getError());
+		assertEquals("User not found with id: " + userId, errorDetail.getMessage());
 		assertNotNull(errorDetail.getTimeStamp());
 	}
 
 	@Test
-	void deleteBlogTestUserIdMismatch() {
-		long blogId = 2L;
-		long incorrectUserId = 999L;
+	@Order(3)
+	void getUserByEmailTest() {
+
+		String email = "email999@email.com";
 
 		ParameterizedTypeReference<ApiResponse<String, ErrorDetail>> responseType = new ParameterizedTypeReference<ApiResponse<String, ErrorDetail>>() {
 		};
 
 		ResponseEntity<ApiResponse<String, ErrorDetail>> response = testRestTemplate
-				.exchange("/api/blogs/" + blogId + "/" + incorrectUserId, HttpMethod.DELETE, null, responseType);
+				.exchange("/api/users/get-by-email/" + email, HttpMethod.GET, null, responseType);
 
-		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 
 		ApiResponse<String, ErrorDetail> apiResponse = response.getBody();
+
 		assertNotNull(apiResponse);
 
-		assertEquals(400, apiResponse.getStatus());
-		assertNotNull(apiResponse.geterror());
-		assertNull(apiResponse.getData());
+		assertEquals(404, apiResponse.getStatus());
 
 		ErrorDetail errorDetail = apiResponse.geterror();
-		assertEquals("Blog Error", errorDetail.getError());
-		assertEquals("You do not have permissions to delete blogs of others users or user not found: ",
-				errorDetail.getMessage());
+		assertEquals("User Error", errorDetail.getError());
+		assertEquals("User not found with email: " + email, errorDetail.getMessage());
 		assertNotNull(errorDetail.getTimeStamp());
 	}
 
 	@Test
-	void getBlogTestNotFound() {
+	void getUserTestNotFound() {
 		long nonexistentBlogId = 999L;
 
 		ParameterizedTypeReference<ApiResponse<String, ErrorDetail>> responseType = new ParameterizedTypeReference<ApiResponse<String, ErrorDetail>>() {
 		};
 
 		ResponseEntity<ApiResponse<String, ErrorDetail>> response = testRestTemplate
-				.exchange("/api/blogs/" + nonexistentBlogId, HttpMethod.GET, null, responseType);
+				.exchange("/api/users/" + nonexistentBlogId, HttpMethod.GET, null, responseType);
 
 		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 
@@ -123,32 +120,30 @@ public class BlogServiceTestException {
 		assertNull(apiResponse.getData());
 
 		ErrorDetail errorDetail = apiResponse.geterror();
-		assertEquals("Blog Error", errorDetail.getError());
-		assertEquals("Blog not found with id: " + nonexistentBlogId, errorDetail.getMessage());
+		assertEquals("User Error", errorDetail.getError());
+		assertEquals("User not found with id: " + nonexistentBlogId, errorDetail.getMessage());
 		assertNotNull(errorDetail.getTimeStamp());
 	}
 
 	@BeforeEach
 	void setUp() {
 
-		validBlog = BlogBuilder.withAllDummy().setTitle(
-				"Sustainability in Business', 'How companies can integrate sustainability into their business models.")
-				.setContent("Exploring the impact of technology on daily life and future trends.").setUserId(1L)
-				.setId(null).build2();
+		validUser = UserBuilder.withAllDummy().setId(null).setEmail("email@email.com").setName("new.user")
+				.setPassword("password").setUsername("new.user").build2();
 
-		invalidBlog = BlogBuilder.withAllDummy().setTitle("").setDescription(null).setContent("").setUserId(null)
-				.setId(null).build2();
+		invalidUser = UserBuilder.withAllDummy().setId(null).setEmail("").setName("").setPassword("").setUsername("")
+				.build2();
 
 		headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 	}
 
 	@Test
-	void testSaveBlogValidationErrors() {
-		HttpEntity<Blog> requestEntity = new HttpEntity<>(invalidBlog, headers);
+	void testSaveUserValidationErrors() {
+		HttpEntity<User> requestEntity = new HttpEntity<>(invalidUser, headers);
 
 		ResponseEntity<ApiResponse<Map<String, String>, Map<String, String>>> response = testRestTemplate.exchange(
-				"/api/blogs", HttpMethod.POST, requestEntity,
+				"/api/users/new-user", HttpMethod.POST, requestEntity,
 				new ParameterizedTypeReference<ApiResponse<Map<String, String>, Map<String, String>>>() {
 				});
 
@@ -164,24 +159,24 @@ public class BlogServiceTestException {
 		Map<String, String> errorMap = apiResponse.geterror();
 		assertNotNull(errorMap);
 
-		assertTrue(errorMap.containsKey("title"));
-		assertTrue(errorMap.containsKey("description"));
-		assertTrue(errorMap.containsKey("content"));
-		assertTrue(errorMap.containsKey("userId"));
+		assertTrue(errorMap.containsKey("name"));
+		assertTrue(errorMap.containsKey("username"));
+		assertTrue(errorMap.containsKey("email"));
+		assertTrue(errorMap.containsKey("password"));
 
-		assertEquals("The field title must not be blank", errorMap.get("title"));
-		assertEquals("The field description must not be blank", errorMap.get("description"));
-		assertEquals("The field content must not be blank", errorMap.get("content"));
-		assertEquals("The field userId must not be null", errorMap.get("userId"));
+		assertEquals("The field name must not be blank", errorMap.get("name"));
+		assertEquals("The field username must not be blank", errorMap.get("username"));
+		assertEquals("The field email must not be blank", errorMap.get("email"));
+		assertEquals("The field password must not be null", errorMap.get("password"));
 
 		assertNotNull(apiResponse.getTimeStamp());
 	}
 
 	@Test
-	void testUpdateBlogNotFound() {
-		HttpEntity<Blog> requestEntity = new HttpEntity<>(validBlog, headers);
+	void testUpdateUserNotFound() {
+		HttpEntity<User> requestEntity = new HttpEntity<>(validUser, headers);
 
-		ResponseEntity<ApiResponse<String, ErrorDetail>> response = testRestTemplate.exchange("/api/blogs/999",
+		ResponseEntity<ApiResponse<String, ErrorDetail>> response = testRestTemplate.exchange("/api/users/999",
 				HttpMethod.PUT, requestEntity, new ParameterizedTypeReference<ApiResponse<String, ErrorDetail>>() {
 				});
 
@@ -195,18 +190,18 @@ public class BlogServiceTestException {
 
 		ErrorDetail errorDetail = apiResponse.geterror();
 		assertNotNull(errorDetail);
-		assertEquals("Blog Error", errorDetail.getError());
-		assertEquals("Blog not found with id: 999", errorDetail.getMessage());
+		assertEquals("User Error", errorDetail.getError());
+		assertEquals("User not found with id: 999", errorDetail.getMessage());
 
 		assertNotNull(apiResponse.getTimeStamp());
 	}
 
 	@Test
-	void testupdateBlogValidationErrors() {
-		HttpEntity<Blog> requestEntity = new HttpEntity<>(invalidBlog, headers);
+	void testUpdateUserValidationErrors() {
+		HttpEntity<User> requestEntity = new HttpEntity<>(invalidUser, headers);
 
 		ResponseEntity<ApiResponse<Map<String, String>, Map<String, String>>> response = testRestTemplate.exchange(
-				"/api/blogs/1", HttpMethod.PUT, requestEntity,
+				"/api/users/1", HttpMethod.PUT, requestEntity,
 				new ParameterizedTypeReference<ApiResponse<Map<String, String>, Map<String, String>>>() {
 				});
 
@@ -222,15 +217,15 @@ public class BlogServiceTestException {
 		Map<String, String> errorMap = apiResponse.geterror();
 		assertNotNull(errorMap);
 
-		assertTrue(errorMap.containsKey("title"));
-		assertTrue(errorMap.containsKey("description"));
-		assertTrue(errorMap.containsKey("content"));
-		assertTrue(errorMap.containsKey("userId"));
+		assertTrue(errorMap.containsKey("name"));
+		assertTrue(errorMap.containsKey("username"));
+		assertTrue(errorMap.containsKey("email"));
+		assertTrue(errorMap.containsKey("password"));
 
-		assertEquals("The field title must not be blank", errorMap.get("title"));
-		assertEquals("The field description must not be blank", errorMap.get("description"));
-		assertEquals("The field content must not be blank", errorMap.get("content"));
-		assertEquals("The field userId must not be null", errorMap.get("userId"));
+		assertEquals("The field name must not be blank", errorMap.get("name"));
+		assertEquals("The field username must not be blank", errorMap.get("username"));
+		assertEquals("The field email must not be blank", errorMap.get("email"));
+		assertEquals("The field password must not be null", errorMap.get("password"));
 
 		assertNotNull(apiResponse.getTimeStamp());
 	}

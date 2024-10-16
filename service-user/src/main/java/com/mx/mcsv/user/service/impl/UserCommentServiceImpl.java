@@ -1,6 +1,5 @@
 package com.mx.mcsv.user.service.impl;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -35,7 +34,20 @@ public class UserCommentServiceImpl {
 
 			ResponseEntity<?> responseComment = commentOpenFeign.saveComment(commentRequestDTO);
 
-			return convertToApiResponse((Map<String, Object>) responseComment.getBody());
+			System.out.println("*****");
+			System.out.println("comment");
+
+			ApiResponse<T, Object> res = (ApiResponse<T, Object>) responseComment.getBody();
+
+			System.out.println(responseComment.getBody());
+			System.out.println("error: " + res.geterror());
+			System.out.println("data: " + res.getData());
+			System.out.println("status: " + res.getStatus());
+			System.out.println("times: " + res.getTimeStamp());
+
+			return res;
+
+			// return convertToApiResponse((Map<String, Object>) responseComment.getBody());
 
 		} catch (FeignException e) {
 			String errorMessage = e.contentUTF8();
@@ -50,7 +62,10 @@ public class UserCommentServiceImpl {
 
 			ResponseEntity<?> response = commentOpenFeign.deleteComment(id, userId);
 
-			return convertToApiResponse((Map<String, Object>) response.getBody());
+			ApiResponse<T, Object> res = (ApiResponse<T, Object>) response.getBody();
+
+			return res;
+			// return convertToApiResponse((Map<String, Object>) response.getBody());
 		} catch (FeignException e) {
 			String errorMessage = e.contentUTF8();
 
@@ -67,7 +82,11 @@ public class UserCommentServiceImpl {
 			ResponseEntity<?> responseBlog = blogOpenFeign.getBlog(id);
 
 			ResponseEntity<?> response = commentOpenFeign.getCommentsByBlog(id);
-			return convertToApiResponse((Map<String, Object>) response.getBody());
+
+			ApiResponse<T, Object> res = (ApiResponse<T, Object>) response.getBody();
+
+			return res;
+			// return convertToApiResponse((Map<String, Object>) response.getBody());
 		} catch (FeignException e) {
 			String errorMessage = e.contentUTF8();
 
@@ -82,7 +101,10 @@ public class UserCommentServiceImpl {
 
 		try {
 			ResponseEntity<?> response = commentOpenFeign.getCommentsByUser(id);
-			return convertToApiResponse((Map<String, Object>) response.getBody());
+			ApiResponse<T, Object> res = (ApiResponse<T, Object>) response.getBody();
+
+			return res;
+			// return convertToApiResponse((Map<String, Object>) response.getBody());
 		} catch (FeignException e) {
 			String errorMessage = e.contentUTF8();
 
@@ -91,16 +113,6 @@ public class UserCommentServiceImpl {
 			return new ApiResponse<>(e.status(), null, errorDetails);
 		}
 
-	}
-
-	@SuppressWarnings("unchecked")
-	private <T> ApiResponse<T, Object> convertToApiResponse(Map<String, Object> responseBody) {
-		ApiResponse<T, Object> apiResponse = new ApiResponse<>();
-		apiResponse.setStatus((Integer) responseBody.get("status"));
-		apiResponse.setData((T) responseBody.get("data"));
-		apiResponse.seterror(responseBody.get("error"));
-		apiResponse.setTimeStamp(LocalDateTime.now());
-		return apiResponse;
 	}
 
 	private Object extractError(String errorResponse) {
@@ -129,11 +141,6 @@ public class UserCommentServiceImpl {
 		} catch (JsonProcessingException e) {
 			return Map.of("error", "Failed to extract error details");
 		}
-	}
-
-	private <T> ApiResponse<T, Object> handleErrorResponse(ResponseEntity<?> response) {
-		String errorMessage = "Error: " + response.getStatusCode();
-		return new ApiResponse<>(response.getStatusCodeValue(), null, errorMessage);
 	}
 
 }

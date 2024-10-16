@@ -33,6 +33,7 @@ public class UserBlogServiceImpl {
 			return response.getBody();
 
 		} catch (HttpClientErrorException e) {
+
 			String errorMessage = e.getResponseBodyAsString();
 			Object errorDetails = extractError(errorMessage);
 
@@ -50,16 +51,11 @@ public class UserBlogServiceImpl {
 			return response.getBody();
 
 		} catch (HttpClientErrorException e) {
+
 			String errorMessage = e.getResponseBodyAsString();
 			Object errorDetails = extractError(errorMessage);
 
-			if (e.getStatusCode() == HttpStatus.BAD_REQUEST) {
-				return new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), null, errorDetails);
-			} else if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-				return new ApiResponse<>(HttpStatus.NOT_FOUND.value(), null, errorDetails);
-			} else {
-				return new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), null, errorDetails);
-			}
+			return new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), null, errorDetails);
 		}
 	}
 
@@ -72,8 +68,9 @@ public class UserBlogServiceImpl {
 
 			return response.getBody();
 
-		} catch (Exception e) {
-			String errorMessage = e.getMessage();
+		} catch (HttpClientErrorException e) {
+
+			String errorMessage = e.getResponseBodyAsString();
 
 			Object errorDetails = extractError(errorMessage);
 

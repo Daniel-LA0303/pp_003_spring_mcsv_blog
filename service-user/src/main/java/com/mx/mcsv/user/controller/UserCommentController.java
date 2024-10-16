@@ -47,7 +47,6 @@ public class UserCommentController {
 		userService.findById(userId);
 
 		ApiResponse<Object, Object> apiResponse = userCommentService.deleteComment(id, userId, blogId);
-
 		return new ResponseEntity<>(apiResponse, HttpStatus.valueOf(apiResponse.getStatus()));
 
 	}
@@ -73,7 +72,7 @@ public class UserCommentController {
 	private ResponseEntity<?> fallBackCreateComment(CommentRequestDTO commentRequestDTO, RuntimeException e) {
 
 		ApiResponse<Object, String> response = new ApiResponse<>(HttpStatus.SERVICE_UNAVAILABLE.value(), null,
-				"Unable to create comment at the moment, please try //again later");
+				"Unable to create comment at the moment, please try again later");
 		return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatus()));
 	}
 

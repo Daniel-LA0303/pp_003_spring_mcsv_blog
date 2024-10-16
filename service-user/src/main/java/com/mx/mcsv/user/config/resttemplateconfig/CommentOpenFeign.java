@@ -8,21 +8,23 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.mx.mcsv.user.dto.ApiResponse;
 import com.mx.mcsv.user.dto.CommentRequestDTO;
 
 @FeignClient(name = "service-comments")
 public interface CommentOpenFeign {
 
+	// *****PRIMERO REVISAR SI FUNCIONA
 	@DeleteMapping("/api/comments/{id}/{userId}")
-	public ResponseEntity<?> deleteComment(@PathVariable Long id, @PathVariable Long userId);
+	public ResponseEntity<ApiResponse<?, ?>> deleteComment(@PathVariable Long id, @PathVariable Long userId);
 
 	@GetMapping("/api/comments/by-blog/{id}")
-	public ResponseEntity<?> getCommentsByBlog(@PathVariable Long id);
+	public ResponseEntity<ApiResponse<?, ?>> getCommentsByBlog(@PathVariable Long id);
 
 	@GetMapping("/api/comments/by-user/{id}")
-	public ResponseEntity<?> getCommentsByUser(@PathVariable Long id);
+	public ResponseEntity<ApiResponse<?, ?>> getCommentsByUser(@PathVariable Long id);
 
 	@PostMapping("/api/comments")
-	public ResponseEntity<?> saveComment(@RequestBody CommentRequestDTO comment);
+	public ResponseEntity<ApiResponse<?, ?>> saveComment(@RequestBody CommentRequestDTO comment);
 
 }

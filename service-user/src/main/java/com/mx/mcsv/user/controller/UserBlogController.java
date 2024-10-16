@@ -29,7 +29,7 @@ public class UserBlogController {
 	@Autowired
 	private UserBlogServiceImpl userBlogService;
 
-	@PostMapping("")
+	@PostMapping
 	@CircuitBreaker(name = "blogCB", fallbackMethod = "fallBackCreateBlogForUser")
 	public ResponseEntity<?> createBlogForUser(@RequestBody BlogRequestDTO blogRequest) throws UserException {
 

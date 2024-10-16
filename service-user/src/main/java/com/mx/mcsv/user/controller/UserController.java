@@ -71,7 +71,7 @@ public class UserController {
 
 		UserDTO userDTO = userService.save(user);
 		ApiResponse<UserDTO, String> response = new ApiResponse<>(201, userDTO, null);
-		return new ResponseEntity<>(response, HttpStatus.OK);
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
 
 	}
 
@@ -93,7 +93,7 @@ public class UserController {
 		Map<String, String> errorsMap = new HashMap<>();
 
 		result.getFieldErrors().forEach(err -> {
-			errorsMap.put(err.getField(), "The field " + err.getField() + " " + err.getDefaultMessage());
+			errorsMap.put(err.getField(), err.getDefaultMessage());
 		});
 
 		ApiResponse<Map<String, String>, Map<String, String>> apiResponse = new ApiResponse<>(400, null, errorsMap);

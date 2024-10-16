@@ -17,19 +17,19 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotBlank
+	@NotBlank(message = "The field name must not be blank")
 	@Column(name = "name")
 	private String name;
 
-	@NotBlank
-	@Column(name = "username", unique = true)
+	@NotBlank(message = "The field username must not be blank")
+	@Column(name = "username")
 	private String username;
 
-	@NotBlank
-	@Column(name = "email", unique = true)
+	@NotBlank(message = "The field email must not be blank")
+	@Column(name = "email")
 	private String email;
 
-	@NotEmpty
+	@NotEmpty(message = "The field password must not be null")
 	@Column(name = "password")
 	private String password;
 
