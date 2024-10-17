@@ -11,12 +11,6 @@ public class ErrorDetail {
 	private LocalDateTime timeStamp;
 
 	/**
-	 * 
-	 */
-	public ErrorDetail() {
-	}
-
-	/**
 	 * @param error
 	 * @param message
 	 * @param timeStamp
@@ -43,42 +37,6 @@ public class ErrorDetail {
 	 */
 	public String getMessage() {
 		return message;
-	}
-
-	/**
-	 * return the value of the property timeStamp
-	 *
-	 * @return the timeStamp
-	 */
-	public LocalDateTime getTimeStamp() {
-		return timeStamp;
-	}
-
-	/**
-	 * set the value of the property error
-	 *
-	 * @param error the error to set
-	 */
-	public void setError(String error) {
-		this.error = error;
-	}
-
-	/**
-	 * set the value of the property message
-	 *
-	 * @param message the message to set
-	 */
-	public void setMessage(String message) {
-		this.message = message;
-	}
-
-	/**
-	 * set the value of the property timeStamp
-	 *
-	 * @param timeStamp the timeStamp to set
-	 */
-	public void setTimeStamp(LocalDateTime timeStamp) {
-		this.timeStamp = timeStamp;
 	}
 
 }

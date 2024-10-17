@@ -19,7 +19,7 @@ import com.mx.mcsv.auth.dto.ApiResponse;
 import com.mx.mcsv.auth.dto.LoginUserDTO;
 import com.mx.mcsv.auth.dto.TokenDto;
 import com.mx.mcsv.auth.dto.UserDTO;
-import com.mx.mcsv.auth.exceptions.AuthException;
+
 import com.mx.mcsv.auth.service.AuthUserService;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -33,7 +33,7 @@ public class AuthUserController {
 
 	@PostMapping("/create")
 	@CircuitBreaker(name = "userCB", fallbackMethod = "fallBackCreateUser")
-	public ResponseEntity<?> create(@Valid @RequestBody UserDTO dto, BindingResult result) throws AuthException {
+	public ResponseEntity<?> create(@Valid @RequestBody UserDTO dto, BindingResult result)  {
 		if (result.hasErrors()) {
 			return validation(result);
 		}
@@ -45,12 +45,12 @@ public class AuthUserController {
 
 	@PostMapping("/login")
 	@CircuitBreaker(name = "userCB", fallbackMethod = "fallBackLoginUser")
-	public ResponseEntity<?> login(@Valid @RequestBody LoginUserDTO dto, BindingResult result) throws AuthException {
+	public ResponseEntity<?> login(@Valid @RequestBody LoginUserDTO dto, BindingResult result)  {
 
 		if (result.hasErrors()) {
 			return validation(result);
 		}
-		ApiResponse<TokenDto, Object> response = authUserService.login(dto);
+		ApiResponse<Object, Object> response = authUserService.login(dto);
 
 		return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatus()));
 
@@ -82,7 +82,7 @@ public class AuthUserController {
 		Map<String, String> errorsMap = new HashMap<>();
 
 		result.getFieldErrors().forEach(err -> {
-			errorsMap.put(err.getField(), "The field " + err.getField() + " " + err.getDefaultMessage());
+			errorsMap.put(err.getField(), err.getDefaultMessage());
 		});
 
 		ApiResponse<Map<String, String>, Map<String, String>> apiResponse = new ApiResponse<>(400, null, errorsMap);

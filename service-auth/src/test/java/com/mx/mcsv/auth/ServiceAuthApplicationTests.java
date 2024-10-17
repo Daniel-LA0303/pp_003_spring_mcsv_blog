@@ -7,6 +7,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 class ServiceAuthApplicationTests {
 
 	@Test
+	public void main() {
+		ServiceAuthApplication.main(new String[] {});
+	}
+
+	@Test
 	void contextLoads() {
 	}
 

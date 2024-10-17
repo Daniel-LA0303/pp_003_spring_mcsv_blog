@@ -19,45 +19,12 @@ public class UserResponseDTO {
 	}
 
 	/**
-	 * @param id
-	 * @param name
-	 * @param username
-	 * @param email
-	 * @param password
-	 */
-	public UserResponseDTO(Long id, String name, String username, String email, String password) {
-		this.id = id;
-		this.name = name;
-		this.username = username;
-		this.email = email;
-		this.password = password;
-	}
-
-	/**
 	 * return the value of the property email
 	 *
 	 * @return the email
 	 */
 	public String getEmail() {
 		return email;
-	}
-
-	/**
-	 * return the value of the property id
-	 *
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
-
-	/**
-	 * return the value of the property name
-	 *
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
 	}
 
 	/**

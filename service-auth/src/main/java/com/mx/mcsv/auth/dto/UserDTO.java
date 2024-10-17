@@ -5,16 +5,16 @@ import javax.validation.constraints.NotEmpty;
 
 public class UserDTO {
 
-	@NotBlank
+	@NotBlank(message = "The field name must not be blank")
 	private String name;
 
-	@NotBlank
+	@NotBlank(message = "The field username must not be blank")
 	private String username;
 
-	@NotBlank
+	@NotBlank(message = "The field email must not be blank")
 	private String email;
 
-	@NotEmpty
+	@NotEmpty(message = "The field password must not be null")
 	private String password;
 
 	/**

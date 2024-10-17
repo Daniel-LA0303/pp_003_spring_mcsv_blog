@@ -1,5 +1,6 @@
 package com.mx.mcsv.auth.service;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,15 +18,10 @@ import com.mx.mcsv.auth.dto.LoginUserDTO;
 import com.mx.mcsv.auth.dto.TokenDto;
 import com.mx.mcsv.auth.dto.UserDTO;
 import com.mx.mcsv.auth.dto.UserResponseDTO;
-import com.mx.mcsv.auth.exceptions.AuthException;
-import com.mx.mcsv.auth.repository.AuthUserRepository;
 import com.mx.mcsv.auth.security.JwtProvider;
 
 @Service
 public class AuthUserService {
-
-	@Autowired
-	AuthUserRepository authUserRepository;
 
 	@Autowired
 	PasswordEncoder passwordEncoder;
@@ -38,7 +34,7 @@ public class AuthUserService {
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
-	public <T> ApiResponse<TokenDto, Object> login(LoginUserDTO dto) throws AuthException {
+	public <T> ApiResponse<Object, Object> login(LoginUserDTO dto) {
 
 		try {
 			ResponseEntity<ApiResponse<T, Object>> responseUserEmail = restTemplate.getForEntity(
@@ -52,30 +48,37 @@ public class AuthUserService {
 
 			if (!passwordEncoder.matches(dto.getPassword(), userResponseDTO.getPassword())) {
 				System.out.println("Password incorrecta");
-				throw new AuthException("Password incorrect", HttpStatus.BAD_REQUEST);
+				// throw new AuthException("Password incorrect", HttpStatus.BAD_REQUEST);
+				return new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), "Incorrect password", null);
 			}
 
 			String token = jwtProvider.createToken(userResponseDTO);
 			TokenDto tokenDto = new TokenDto(token);
 
-			return new ApiResponse<>(HttpStatus.OK.value(), tokenDto, null);
+			ApiResponse<Object, Object> response = new ApiResponse<>();
+
+			response.setStatus(HttpStatus.OK.value());
+			response.setData(tokenDto);
+			response.seterror(null);
+			response.setTimeStamp(LocalDateTime.now());
+
+			return response;
 
 		} catch (HttpClientErrorException e) {
-			String errorMessage = e.getMessage();
+			String errorMessage = e.getResponseBodyAsString();
 			Object errorDetails = extractError(errorMessage);
 
 			return new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), null, errorDetails);
 		}
 	}
 
-	public <T> ApiResponse<T, Object> save(UserDTO dto) throws AuthException {
+	public <T> ApiResponse<T, Object> save(UserDTO dto) {
 
 		try {
 
 			String password = passwordEncoder.encode(dto.getPassword());
 
 			dto.setPassword(password);
-
 			ResponseEntity<ApiResponse<T, Object>> response = restTemplate.postForEntity(
 					"http://service-user/api/users/new-user", dto,
 					(Class<ApiResponse<T, Object>>) (Class<?>) ApiResponse.class);
@@ -83,7 +86,10 @@ public class AuthUserService {
 			return response.getBody();
 
 		} catch (HttpClientErrorException e) {
-			String errorMessage = e.getMessage();
+			String errorMessage = e.getResponseBodyAsString();
+
+			System.out.println("*****error service");
+			System.out.println(errorMessage);
 
 			Object errorDetails = extractError(errorMessage);
 

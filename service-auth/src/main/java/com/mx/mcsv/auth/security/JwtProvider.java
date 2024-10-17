@@ -17,6 +17,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 
 @Component
 public class JwtProvider {
+
 	@Value("${jwt.secret}")
 	private String secret;
 
@@ -38,6 +39,11 @@ public class JwtProvider {
 		}
 	}
 
+	@PostConstruct
+	public void init() {
+		secret = Base64.getEncoder().encodeToString(secret.getBytes());
+	}
+
 	public boolean validate(String token) {
 		try {
 			Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
@@ -45,10 +51,5 @@ public class JwtProvider {
 		} catch (Exception e) {
 			return false;
 		}
-	}
-
-	@PostConstruct
-	protected void init() {
-		secret = Base64.getEncoder().encodeToString(secret.getBytes());
 	}
 }

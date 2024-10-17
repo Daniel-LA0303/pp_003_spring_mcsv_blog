@@ -18,15 +18,6 @@ public class TokenDto {
 	}
 
 	/**
-	 * return the value of the property token
-	 *
-	 * @return the token
-	 */
-	public String getToken() {
-		return token;
-	}
-
-	/**
 	 * set the value of the property token
 	 *
 	 * @param token the token to set
