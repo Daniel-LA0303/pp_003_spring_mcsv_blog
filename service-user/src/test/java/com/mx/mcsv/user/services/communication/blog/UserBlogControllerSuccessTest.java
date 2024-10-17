@@ -27,7 +27,7 @@ import com.mx.mcsv.user.utils.BlogRequestDTOBuilder;
 public class UserBlogControllerSuccessTest {
 
 	@InjectMocks
-	private UserBlogController userBlogController; // Cambiado a UserBlogController
+	private UserBlogController userBlogController;
 
 	@Mock
 	private UserService userService;
